@@ -4,7 +4,6 @@ test_transform.py — Testes unitarios das transformacoes do pipeline.
 
 import pytest
 import pandas as pd
-import numpy as np
 from etl.transform import DeliveryTransformer
 
 
