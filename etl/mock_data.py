@@ -6,7 +6,7 @@ Cria 12.000 registros com cenarios de erro propositais (duplicatas, coordenadas 
 import pandas as pd
 import numpy as np
 from faker import Faker
-from datetime import datetime, timedelta
+from datetime import timedelta
 import random
 
 fake = Faker("pt_BR")
