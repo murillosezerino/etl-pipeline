@@ -1,5 +1,10 @@
 # ETL Pipeline: dados de entregas logísticas
 
+[![CI](https://github.com/murillosezerino/etl-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/murillosezerino/etl-pipeline/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![Parquet](https://img.shields.io/badge/format-Parquet-50ABF1)
+![Cloudflare R2](https://img.shields.io/badge/storage-Cloudflare%20R2-F38020)
+
 Pipeline ETL multi-estágio em Python, do dado bruto à carga particionada em Parquet no Cloudflare R2. O domínio é logística de entregas, familiar da minha passagem pela Loggi, e o foco são padrões que aparecem em pipeline de produção: transformação testada, gate de qualidade de dados e carga incremental idempotente.
 
 ## O que o projeto demonstra
@@ -75,5 +80,5 @@ Os dados são sintéticos, gerados com cenários de erro propositais (duplicatas
 
 ## Autor
 
-Murillo Sezerino, Engenheiro de Dados
+Murillo Sezerino — Data Engineer & Analytics
 [murillosezerino.com](https://murillosezerino.com) · [LinkedIn](https://linkedin.com/in/murillosezerino)
