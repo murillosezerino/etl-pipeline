@@ -1,0 +1,35 @@
+name: Scheduled ETL
+
+# Roda o pipeline em agenda diaria (e sob demanda). Fica verde mesmo sem os
+# segredos do R2 configurados: nesse caso apenas registra que pulou.
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_RAW_BUCKET: ${{ secrets.R2_RAW_BUCKET }}
+      R2_PROCESSED_BUCKET: ${{ secrets.R2_PROCESSED_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Seed a dated batch and run the pipeline
+        if: ${{ env.R2_ENDPOINT != '' }}
+        run: |
+          python -m etl.seed_source
+          python main.py
+
+      - name: Skip (no R2 secrets configured)
+        if: ${{ env.R2_ENDPOINT == '' }}
+        run: echo "R2 secrets not configured; skipping the live run. Add R2_* in repo Settings > Secrets to enable the schedule."
