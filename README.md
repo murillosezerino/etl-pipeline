@@ -14,16 +14,18 @@ Pipeline ETL multi-estágio em Python, do dado bruto à carga particionada em Pa
 - Gate de qualidade de dados: um conjunto de checagens que para o pipeline antes de gravar dado ruim no destino.
 - Carga incremental por watermark: cada execução processa apenas os registros novos desde a última e avança o marcador.
 - Carga particionada em Parquet no padrão `year=/month=/day=`.
-- Cobertura de testes para transformação, qualidade e lógica incremental, com lint e CI no GitHub Actions.
+- Descoberta de lotes datados no object storage (`list_files`) e verificação read-after-write (relê o Parquet gravado antes de avançar o watermark).
+- Cobertura de testes para transformação, qualidade, lógica incremental e a fronteira de I/O com moto (S3 mockado), com lint e CI no GitHub Actions.
 
 ## Arquitetura
 
 ```
-mock/raw  ->  extract  ->  transform  ->  quality gate  ->  incremental filter  ->  load (Parquet particionado)
-                                              |                     |
-                                          para se                avanca o
-                                          critico falha          watermark
+seed_source (lote datado)  ->  raw/deliveries/dt=YYYY-MM-DD/  ->  discover (list_files)
+  ->  extract  ->  transform  ->  quality gate  ->  incremental filter (watermark)
+  ->  load (Parquet particionado)  ->  verify read-after-write (read_parquet)  ->  avanca watermark
 ```
+
+O seeding fica DESACOPLADO em `etl/seed_source.py` (simula o sistema upstream aterrissando lotes datados). O `main.py` apenas descobre e processa os lotes ainda não vistos, então o incremental por watermark é real entre lotes, não um relê do mesmo arquivo.
 
 ## Camada de qualidade
 
@@ -51,9 +53,11 @@ etl-pipeline/
 │   ├── quality.py     # checagens e gate de qualidade
 │   ├── state.py       # watermark e filtro incremental
 │   ├── load.py        # escrita particionada em Parquet
+│   ├── seed_source.py # simula o upstream: aterrissa lotes raw datados
 │   └── mock_data.py   # geração de dados sintéticos para teste
-├── tests/             # testes de transform, quality e state
+├── tests/             # transform, quality, state e I/O (moto)
 ├── config/            # configuração via variáveis de ambiente
+├── Dockerfile         # container do pipeline
 └── main.py            # orquestrador
 ```
 
@@ -61,8 +65,9 @@ etl-pipeline/
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # preencha as credenciais do R2
-python main.py
+cp .env.example .env          # preencha as credenciais do R2
+python -m etl.seed_source     # aterrissa um lote datado no raw
+python main.py                # descobre e processa os lotes novos
 ```
 
 Variáveis de ambiente esperadas: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_RAW_BUCKET`, `R2_PROCESSED_BUCKET`.
@@ -73,6 +78,8 @@ Variáveis de ambiente esperadas: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_
 ruff check .
 python -m pytest tests/ -v
 ```
+
+Os testes de I/O (`test_io_r2.py`) usam moto (S3 mockado), então rodam sem credenciais reais do R2.
 
 ## Observação
 

@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 class R2Extractor:
     """Le arquivos CSV ou Parquet do Cloudflare R2."""
 
-    def __init__(self, bucket: str, endpoint: str, access_key: str, secret_key: str):
+    def __init__(self, bucket: str, endpoint: str, access_key: str, secret_key: str, region: str = "auto"):
         self.bucket = bucket
         self.s3 = boto3.client(
             "s3",
             endpoint_url=endpoint,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
-            region_name="auto",
+            region_name=region,
         )
 
     def read_csv(self, key: str, **kwargs) -> pd.DataFrame:
