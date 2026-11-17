@@ -87,5 +87,5 @@ Os dados são sintéticos, gerados com cenários de erro propositais (duplicatas
 
 ## Autor
 
-Murillo Sezerino — Data Engineer & Analytics
+Murillo Sezerino — Software Engineer · Full Stack
 [murillosezerino.com](https://murillosezerino.com) · [LinkedIn](https://linkedin.com/in/murillosezerino)
